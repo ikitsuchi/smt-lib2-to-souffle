@@ -61,6 +61,11 @@ rule token = parse
   | "check-sat-assuming" { CHECK_SAT_ASSUMING }
   | "check-sat" { CHECK_SAT }
   | "get-value" { GET_VALUE }
+  | "define-sort" { DEFINE_SORT }
+  | "declare-rel" { DECLARE_REL }
+  | "declare-var" { DECLARE_VAR }
+  | "rule" { RULE }
+  | "query" { QUERY }
   | atom { IDENT(Lexing.lexeme lexbuf) }
   | invbars {
       let s = Lexing.lexeme lexbuf in

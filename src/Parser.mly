@@ -84,6 +84,11 @@
 %token CHECK_SAT
 %token CHECK_SAT_ASSUMING
 %token GET_VALUE
+%token DEFINE_SORT
+%token DECLARE_REL
+%token DECLARE_VAR
+%token RULE
+%token QUERY
 
 %token <string>IDENT
 %token <string>QUOTED
@@ -213,6 +218,33 @@ stmt:
       let s, n = td in
       Ast.decl_sort ~loc s ~arity:n
     }
+  | LEFT_PAREN
+    DEFINE_SORT name=IDENT
+    LEFT_PAREN tyvars=tyvar* RIGHT_PAREN
+    LEFT_PAREN sort=var arg=tyvar+ RIGHT_PAREN
+    RIGHT_PAREN
+    {
+      let loc = Loc.mk_pos $startpos $endpos in
+      Ast.def_sort ~loc name ~params:tyvars ~gen:sort ~gen_args:arg
+    }
+  | LEFT_PAREN
+    DECLARE_REL name=IDENT
+    LEFT_PAREN tyvars=tyvar* RIGHT_PAREN
+    RIGHT_PAREN
+    {
+      let loc = Loc.mk_pos $startpos $endpos in
+      Ast.decl_rel ~loc name tyvars
+    }
+  | LEFT_PAREN DECLARE_VAR v=tyvar ty=ty RIGHT_PAREN
+    {
+      let loc = Loc.mk_pos $startpos $endpos in
+      Ast.decl_var ~loc v ty
+    }
+  | LEFT_PAREN RULE t=term RIGHT_PAREN
+    {
+      let loc = Loc.mk_pos $startpos $endpos in
+      Ast.rule ~loc t
+    }
   | LEFT_PAREN DATA
       LEFT_PAREN tys=ty_decl_paren+ RIGHT_PAREN
       LEFT_PAREN l=cstors+ RIGHT_PAREN
@@ -268,6 +300,11 @@ stmt:
     {
       let loc = Loc.mk_pos $startpos $endpos in
       Ast.get_value ~loc l
+    }
+  | LEFT_PAREN QUERY t=IDENT+ RIGHT_PAREN
+    {
+      let loc = Loc.mk_pos $startpos $endpos in
+      Ast.query ~loc t
     }
   | LEFT_PAREN s=IDENT args=anystr* RIGHT_PAREN
     {
